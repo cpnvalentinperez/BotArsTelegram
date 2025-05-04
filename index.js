@@ -30,6 +30,29 @@ async function obtenerDolarBlue() {
   }
 }
 
+async function obtenerMultiplesCotizaciones() {
+  try {
+    const res = await axios.get('https://criptoya.com/api/usdt/ars/0.1'); // cotización general
+    const exchanges = ['fiwind', 'binancep2p', 'lemoncash', 'belo', 'ripio','letsbit'];
+    const resultados = [];
+
+    exchanges.forEach((exchange) => {
+      if (res.data[exchange]) {
+        const precio = res.data[exchange].totalAsk || res.data[exchange].ask;
+        resultados.push({
+          exchange,
+          precio: Math.round(precio)
+        });
+      }
+    });
+
+    return resultados;
+  } catch (error) {
+    console.error("Error al obtener cotizaciones múltiples:", error.message);
+    throw new Error('❌ No se pudo obtener la cotización en múltiples exchanges');
+  }
+}
+
 // Procesamiento de imagen (OCR)
 async function procesarImagen(fileId, token) {
   const file = await bot.getFile(fileId);
@@ -58,14 +81,22 @@ async function procesarImagen(fileId, token) {
 // Cuando llega texto, respondo con USDT + Dólar Blue(+20)
 bot.on('text', async (ctx) => {
   try {
+    
     const { ask, fecha } = await obtenerCotizacionUSDT();
     const { compra, venta,compraUsdt } = await obtenerDolarBlue();
+
+    const cotizaciones = await obtenerMultiplesCotizaciones();
+    let cotizacionMsg = '🏦 *USDT en múltiples exchanges*\n';
+
+    cotizaciones.forEach(({ exchange, precio }) => {
+    cotizacionMsg += `• ${exchange.toUpperCase()}: $${precio}\n`;
+    });
 
     const msg =  
       `💸 *Cotización x USDT*\n` +
       `📈 Compra: $${compraUsdt}\n` +
-      `📈 Venta: $${ask}\n` +
-      
+      `📈 Venta: $${ask}\n\n` +
+      cotizacionMsg + '\n' +        
       `💵 *Dólar Blue*\n` +
       `💲 Compra USD: $${compra}\n` +
       `💲 Venta USD: $${venta}\n` +
