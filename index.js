@@ -62,25 +62,33 @@ async function obtenerMultiplesCotizaciones() {
   }
 }
 
-// Cuando el usuario escribe cualquier texto, mostramos los botones
-bot.on('text', async (ctx) => {
+// Comando /dolar
+bot.command('dolar', async (ctx) => {
   try {
-    await ctx.reply(
-      '¿Qué cotización querés ver?',
-      Markup.inlineKeyboard([
-        [Markup.button.callback('💸 USDT', 'ver_usdt')],
-        [Markup.button.callback('💵 Dólar Blue', 'ver_dolar')],
-      ])
-    );
+    const { compra, venta, compraUsdt } = await obtenerDolarBlue();
+
+    const fecha = new Intl.DateTimeFormat('es-AR', {
+      timeZone: 'America/Argentina/Buenos_Aires',
+      dateStyle: 'short',
+      timeStyle: 'medium'
+    }).format(new Date());
+
+    const msg =
+      `💵 *Dólar Blue*\n` +
+      `💲 Compra USD: $${compra}\n` +
+      `💲 Venta USD: $${venta}\n` +
+      `🕒 Fecha: ${fecha}\n\n`;
+
+    await ctx.replyWithMarkdown(msg);
   } catch (e) {
-    console.error('Error al enviar los botones:', e.message);
-    await ctx.reply('❌ Ocurrió un error al mostrar las opciones.');
+    console.error(e);
+    await ctx.reply('❌ Error al obtener el Dólar Blue');
   }
 });
-// Acción para botón USDT
-bot.action('ver_usdt', async (ctx) => {
+
+// Comando /usdt
+bot.command('usdt', async (ctx) => {
   try {
-    await ctx.answerCbQuery(); // para limpiar el botón cargando
     const { ask, fecha } = await obtenerCotizacionUSDT();
     const { compraUsdt } = await obtenerDolarBlue();
     const cotizaciones = await obtenerMultiplesCotizaciones();
@@ -101,30 +109,6 @@ bot.action('ver_usdt', async (ctx) => {
   } catch (e) {
     console.error(e);
     await ctx.reply('❌ Error al obtener la cotización de USDT');
-  }
-});
-
-// Acción para botón Dólar
-bot.action('ver_dolar', async (ctx) => {
-  try {
-    await ctx.answerCbQuery();
-    const { compra, venta } = await obtenerDolarBlue();
-    const fecha = new Intl.DateTimeFormat('es-AR', {
-      timeZone: 'America/Argentina/Buenos_Aires',
-      dateStyle: 'short',
-      timeStyle: 'medium'
-    }).format(new Date());
-
-    const msg =
-      `💵 *Dólar Blue*\n` +
-      `💲 Compra USD: $${compra}\n` +
-      `💲 Venta USD: $${venta}\n` +
-      `🕒 Fecha: ${fecha}\n\n`;
-
-    await ctx.replyWithMarkdown(msg);
-  } catch (e) {
-    console.error(e);
-    await ctx.reply('❌ Error al obtener el Dólar Blue');
   }
 });
 
