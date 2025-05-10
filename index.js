@@ -2,8 +2,9 @@ const { Telegraf } = require('telegraf');
 const axios = require('axios');
 const Tesseract = require('tesseract.js');
 const fs = require('fs');
+require('dotenv').config();
 
-const bot = new Telegraf('7288597871:AAGTULOO9MvgDY2tVhTTYSFRQ-nwsr0CJug'); // <— reemplazá con tu token
+const bot = new Telegraf(process.env.BOT_TOKEN);
 
 // Función para obtener la cotización de USDT
 async function obtenerCotizacionUSDT() {
