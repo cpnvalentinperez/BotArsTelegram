@@ -4,6 +4,7 @@
   "description": "",
   "main": "index-botones.js",
   "scripts": {
+    "start": "node index-botones.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
